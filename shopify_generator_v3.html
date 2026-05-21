@@ -465,6 +465,15 @@ async function loadFromStorage() {
       state.brands = data.brands || [];
       state.designers = data.designers || [];
       state.series = data.series || [];
+      // linkedBrandsが数値インデックス形式の場合、ブランド名形式に自動変換
+      let migrated = false;
+      state.designers.forEach(d => {
+        if (d.linkedBrands && d.linkedBrands.length > 0 && typeof d.linkedBrands[0] === 'number') {
+          d.linkedBrands = d.linkedBrands.map(idx => state.brands[idx] ? state.brands[idx].nameEn : null).filter(Boolean);
+          migrated = true;
+        }
+      });
+      if (migrated) await saveToStorage();
       document.getElementById('storage-info').textContent = `ブランド${state.brands.length}件・デザイナー${state.designers.length}件・シリーズ${state.series.length}件 読み込み済み`;
     } else {
       // 初回はINITIAL_DATAを使用
