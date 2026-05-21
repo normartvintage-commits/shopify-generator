@@ -549,7 +549,7 @@ function populateSelects() {
   if(prevB) bs.value=prevB;
   ds.innerHTML='<option value="">— 選択 —</option>';
   const selectedBrandIdx = bs.value !== '' ? parseInt(bs.value) : null;
-  state.designers.forEach((d,i)=>{ const dc=(d.country||'').toUpperCase(),fu=(cf||'').toUpperCase(); const countryOk=!cf||dc===fu; const selectedBrandName=selectedBrandIdx!==null&&state.brands[selectedBrandIdx]?state.brands[selectedBrandIdx].nameEn:null; const brandOk=d.multinational||selectedBrandName===null||(d.linkedBrands&&d.linkedBrands.some(b=>b===selectedBrandName||b===selectedBrandIdx)); if(countryOk&&brandOk){const o=document.createElement('option');o.value=i;o.textContent=d.nameEn+(d.multinational?' ★':'');ds.appendChild(o);} });
+  state.designers.forEach((d,i)=>{ const dc=(d.country||'').toUpperCase(),fu=(cf||'').toUpperCase(); const countryOk=!cf||dc===fu; const selectedBrandName=selectedBrandIdx!==null&&state.brands[selectedBrandIdx]?state.brands[selectedBrandIdx].nameEn:null; const brandOk=d.multinational||selectedBrandName===null||!d.linkedBrands||d.linkedBrands.length===0||(d.linkedBrands&&d.linkedBrands.some(b=>b===selectedBrandName||b===selectedBrandIdx)); if(countryOk&&brandOk){const o=document.createElement('option');o.value=i;o.textContent=d.nameEn+(d.multinational?' ★':'');ds.appendChild(o);} });
   if(prevD) ds.value=prevD;
   const sd=document.getElementById('s-designer');
   if(sd){ const prev=sd.value; sd.innerHTML='<option value="">— 選択 —</option>'; state.designers.forEach(d=>{const o=document.createElement('option');o.value=d.nameEn;o.textContent=d.nameEn;sd.appendChild(o);}); if(prev) sd.value=prev; }
