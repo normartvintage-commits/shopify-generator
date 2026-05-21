@@ -540,7 +540,7 @@ function populateSelects() {
   if(prevB) bs.value=prevB;
   ds.innerHTML='<option value="">— 選択 —</option>';
   const selectedBrandIdx = bs.value !== '' ? parseInt(bs.value) : null;
-  state.designers.forEach((d,i)=>{ const dc=(d.country||'').toUpperCase(),fu=(cf||'').toUpperCase(); const countryOk=!cf||dc===fu; const brandOk=d.multinational||selectedBrandIdx===null||(d.linkedBrands&&d.linkedBrands.includes(selectedBrandIdx)); if(countryOk&&brandOk){const o=document.createElement('option');o.value=i;o.textContent=d.nameEn+(d.multinational?' ★':'');ds.appendChild(o);} });
+  state.designers.forEach((d,i)=>{ const dc=(d.country||'').toUpperCase(),fu=(cf||'').toUpperCase(); const countryOk=!cf||dc===fu; const selectedBrandName=selectedBrandIdx!==null&&state.brands[selectedBrandIdx]?state.brands[selectedBrandIdx].nameEn:null; const brandOk=d.multinational||selectedBrandName===null||(d.linkedBrands&&d.linkedBrands.some(b=>b===selectedBrandName||b===selectedBrandIdx)); if(countryOk&&brandOk){const o=document.createElement('option');o.value=i;o.textContent=d.nameEn+(d.multinational?' ★':'');ds.appendChild(o);} });
   if(prevD) ds.value=prevD;
   const sd=document.getElementById('s-designer');
   if(sd){ const prev=sd.value; sd.innerHTML='<option value="">— 選択 —</option>'; state.designers.forEach(d=>{const o=document.createElement('option');o.value=d.nameEn;o.textContent=d.nameEn;sd.appendChild(o);}); if(prev) sd.value=prev; }
@@ -720,7 +720,7 @@ function renderBrandCheckboxes() {
   state.brands.forEach((b, i) => {
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;align-items:center;gap:6px;padding:2px 0;';
-    div.innerHTML = '<input type="checkbox" id="d-brand-' + i + '" value="' + i + '" style="width:auto;cursor:pointer;"><label for="d-brand-' + i + '" style="margin:0;cursor:pointer;font-size:12px;">' + b.nameEn + '</label>';
+    div.innerHTML = '<input type="checkbox" id="d-brand-' + i + '" value="' + b.nameEn.replace(/"/g, '&quot;') + '" style="width:auto;cursor:pointer;"><label for="d-brand-' + i + '" style="margin:0;cursor:pointer;font-size:12px;">' + b.nameEn + '</label>';
     container.appendChild(div);
   });
 }
@@ -732,15 +732,21 @@ function toggleAllBrands(cb) {
 
 function getSelectedBrandIndices() {
   const checked = document.querySelectorAll('#d-brand-checkboxes input[type=checkbox]:checked');
-  return Array.from(checked).map(c => parseInt(c.value));
+  return Array.from(checked).map(c => c.value);
 }
 
 function setDesignerBrandCheckboxes(brands, allBrands) {
   const allCb = document.getElementById('d-all-brands');
   if (allCb) { allCb.checked = !!allBrands; toggleAllBrands(allCb); }
   if (brands && brands.length > 0) {
-    brands.forEach(idx => {
-      const cb = document.getElementById('d-brand-' + idx);
+    brands.forEach(nameOrIdx => {
+      let cb;
+      if (typeof nameOrIdx === 'number') {
+        // 旧形式（数値インデックス）との後方互換
+        cb = document.getElementById('d-brand-' + nameOrIdx);
+      } else {
+        cb = document.querySelector('#d-brand-checkboxes input[value="' + nameOrIdx.replace(/"/g, '\"') + '"]');
+      }
       if (cb) cb.checked = true;
     });
   }
