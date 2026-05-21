@@ -386,9 +386,13 @@
           <div><label>生没年</label><input type="text" id="d-years" placeholder="1932–1998"></div>
           <div><label>国</label><input type="text" id="d-country" placeholder="SWEDEN"></div>
         </div>
-        <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
-          <input type="checkbox" id="d-multinational" style="width:auto;cursor:pointer;">
-          <label for="d-multinational" style="margin:0;cursor:pointer;font-size:12px;color:var(--text-muted);">複数国にまたがるデザイナー</label>
+        <div style="margin-top:10px;">
+          <label>紐付けるブランド（複数選択可）</label>
+          <div id="d-brand-checkboxes" style="max-height:120px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:8px;background:white;"></div>
+          <div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="d-all-brands" style="width:auto;cursor:pointer;" onchange="toggleAllBrands(this)">
+            <label for="d-all-brands" style="margin:0;cursor:pointer;font-size:12px;color:var(--text-muted);">☆ 全ブランドで表示（ブランド選択に関わらず常に表示）</label>
+          </div>
         </div>
         <label>説明文（改行で段落分け）</label>
         <textarea id="d-desc" rows="6" placeholder="デザイナー説明..."></textarea>
@@ -705,6 +709,39 @@ function onColorInput(val) {
   } else {
     const el = document.getElementById('t-color-en');
     if (el) el.value = '';
+  }
+}
+
+function renderBrandCheckboxes() {
+  const container = document.getElementById('d-brand-checkboxes');
+  if (!container) return;
+  container.innerHTML = '';
+  state.brands.forEach((b, i) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:6px;padding:2px 0;';
+    div.innerHTML = '<input type="checkbox" id="d-brand-' + i + '" value="' + i + '" style="width:auto;cursor:pointer;"><label for="d-brand-' + i + '" style="margin:0;cursor:pointer;font-size:12px;">' + b.nameEn + '</label>';
+    container.appendChild(div);
+  });
+}
+
+function toggleAllBrands(cb) {
+  const checkboxes = document.querySelectorAll('#d-brand-checkboxes input[type=checkbox]');
+  checkboxes.forEach(c => c.disabled = cb.checked);
+}
+
+function getSelectedBrandIndices() {
+  const checked = document.querySelectorAll('#d-brand-checkboxes input[type=checkbox]:checked');
+  return Array.from(checked).map(c => parseInt(c.value));
+}
+
+function setDesignerBrandCheckboxes(brands, allBrands) {
+  const allCb = document.getElementById('d-all-brands');
+  if (allCb) { allCb.checked = !!allBrands; toggleAllBrands(allCb); }
+  if (brands && brands.length > 0) {
+    brands.forEach(idx => {
+      const cb = document.getElementById('d-brand-' + idx);
+      if (cb) cb.checked = true;
+    });
   }
 }
 
