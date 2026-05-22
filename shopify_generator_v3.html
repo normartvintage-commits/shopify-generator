@@ -916,58 +916,67 @@ function sendToChat() {
   const inventory=inventoryEl&&inventoryEl.value.trim()?inventoryEl.value.trim():'';
   const tags=buildTags();
   const descHtml=buildHtml();
-  // descHtml already built from textarea
   const seoTitle=document.getElementById('seo-title').value;
   const metaDesc=document.getElementById('meta-desc').value;
   const urlHandle=document.getElementById('url-handle').value;
   const category=document.getElementById('mf-category').value;
   const countryMF=document.getElementById('mf-country').value;
   const brand=document.getElementById('mf-brand').value;
+  const themeTemplate=document.getElementById('theme-template').value||'';
 
-  const message =
-`以下のデータでShopifyに商品を下書き（DRAFT）登録してください。
+  const btn=document.getElementById('claude-register-btn');
+  const statusEl=document.getElementById('claude-status');
+  btn.disabled=true;
+  btn.innerHTML='⌛ 登録中...';
+  statusEl.style.display='block';
+  statusEl.style.background='var(--warning-bg)';
+  statusEl.style.color='var(--warning)';
+  statusEl.innerHTML='🔄 Shopifyに登録中です。しばらくお待ちください...';
 
-【商品タイトル】
-${title}
+  const payload = {
+    action: 'registerProduct',
+    title: title,
+    price: price,
+    tags: tags,
+    descHtml: descHtml,
+    seoTitle: seoTitle,
+    metaDesc: metaDesc,
+    urlHandle: urlHandle,
+    itemCategory: category,
+    country: countryMF,
+    brand: brand,
+    inventory: inventory,
+    themeTemplate: themeTemplate
+  };
 
-【価格（税込・円）】
-${price}
+  fetch('https://script.google.com/macros/s/AKfycbzhoRa-dT9iAeDAtg6O1I21QR-S8k7C04AT43zo9k3rgVnCYJ59I_qWohiumWCfuez4/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(result => {
+    btn.disabled=false;
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2L15 22 11 13 2 9l20-7z"></path></svg> Shopifyに登録する';
+    if(result.success){
+      statusEl.style.background='var(--success-bg)';
+      statusEl.style.color='var(--success)';
+      statusEl.innerHTML='✅ 登録完了！<a href="' + result.adminUrl + '" target="_blank" style="color:var(--success);font-weight:bold;">商品管理ページを開く →</a>';
+    } else {
+      statusEl.style.background='#fdf0ef';
+      statusEl.style.color='#c0392b';
+      statusEl.innerHTML='❌ 登録エラー: ' + (result.error||'不明なエラー');
+    }
+  })
+  .catch(err => {
+    btn.disabled=false;
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2L15 22 11 13 2 9l20-7z"></path></svg> Shopifyに登録する';
+    statusEl.style.background='#fdf0ef';
+    statusEl.style.color='#c0392b';
+    statusEl.innerHTML='❌ 通信エラー: ' + err.message;
+  });
 
-【タグ】
-${tags.join(', ')}
-
-【メタフィールド】
-- Item category: ${category}
-- Country: ${countryMF}
-- Brand: ${brand}
-
-【SEOタイトル】
-${seoTitle}
-
-【メタディスクリプション】
-${metaDesc}
-
-【URLハンドル】
-${urlHandle}
-
-【商品説明HTML】
-${descHtml}
-
-【在庫数】
-${inventory ? inventory + '個（在庫追跡あり）' : '追跡なし'}
-
-【テーマテンプレート】
-${(document.getElementById('theme-template').value) || 'デフォルトの商品'}
-
-登録が完了したら商品管理URLを教えてください。`;
-
-  // チャットに送信
-  if (typeof window.sendPrompt === 'function') {
-    window.sendPrompt(message);
-    const statusEl=document.getElementById('claude-status');
-    statusEl.style.display='block';statusEl.style.background='var(--success-bg)';statusEl.style.color='var(--success)';
-    statusEl.innerHTML='✅ チャットに送信しました！Claudeが登録処理を開始します。';
-  } else {
+  if (false) {
     // フォールバック：クリップボードにコピー
     navigator.clipboard.writeText(message).then(()=>{
       const statusEl=document.getElementById('claude-status');
