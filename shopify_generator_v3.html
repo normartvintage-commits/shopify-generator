@@ -489,6 +489,9 @@ async function loadFromStorage() {
   renderBrands(); renderDesigners(); renderSeriesList(); populateSelects();
   document.getElementById('size').value = 'W φ D H cm';
   document.getElementById('condition').value = '特筆すべきダメージはありません。良好なヴィンテージコンディションです。';
+  // country隠しフィールドをcountry-filterと同期
+  const cfVal = document.getElementById('country-filter').value;
+  if (cfVal) document.getElementById('country').value = cfVal;
 }
 
 // ================= データ管理 =================
@@ -538,7 +541,7 @@ function applyCategory() {
   updateAll();
 }
 
-function filterBrandsByCountry() { populateSelects(); }
+function filterBrandsByCountry() { const cfVal=document.getElementById('country-filter').value; if(cfVal)document.getElementById('country').value=cfVal; populateSelects(); updateAll(); }
 
 function populateSelects() {
   const cf=document.getElementById('country-filter').value;
