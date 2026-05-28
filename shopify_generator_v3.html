@@ -565,7 +565,7 @@ function buildTitle() {
   const cat=document.getElementById('t-category').value.trim(),ser=document.getElementById('t-series').value.trim();
   const feat=document.getElementById('t-feature').value.trim(),col=document.getElementById('t-color').value.trim();
   const tsz=document.getElementById('t-size').value.trim(),mod=document.getElementById('t-model').value.trim();
-  const country=document.getElementById('country').value;
+  const country=document.getElementById('country-filter').value||document.getElementById('country').value;
   // 商品名・タグ表示用にブランド・デザイナー名を先頭大文字に変換
   const brandDisplay=brand?toDisplayCase(brand.nameEn)+(brand.nameJa?'（'+brand.nameJa+'）':''):'';
   const designerDisplay=designer?toDisplayCase(designer.nameEn):'';
@@ -581,7 +581,7 @@ function buildSeoTitle() {
   const cat=document.getElementById('t-category').value.trim(),ser=document.getElementById('t-series').value.trim();
   const feat=document.getElementById('t-feature').value.trim(),col=document.getElementById('t-color').value.trim();
   const tsz=document.getElementById('t-size').value.trim(),mod=document.getElementById('t-model').value.trim();
-  const country=document.getElementById('country').value,material=document.getElementById('material').value;
+  const country=document.getElementById('country-filter').value||document.getElementById('country').value,material=document.getElementById('material').value;
   let parts=['【北欧ヴィンテージ】'];
   if(ser)parts.push(ser);if(cat)parts.push(cat);if(feat)parts.push(feat);if(col)parts.push(col);if(tsz)parts.push(tsz);if(mod)parts.push(mod);
   let title=parts.join(' ');
@@ -836,7 +836,7 @@ function buildAlt() {
   const bi=document.getElementById('brand-select').value,di=document.getElementById('designer-select').value;
   const brand=bi!==''?state.brands[parseInt(bi)]:null,designer=di!==''?state.designers[parseInt(di)]:null;
   const cat=document.getElementById('t-category').value.trim(),ser=document.getElementById('t-series').value.trim();
-  const country=document.getElementById('country').value,feat=document.getElementById('t-feature').value.trim(),col=document.getElementById('t-color').value.trim();
+  const country=document.getElementById('country-filter').value||document.getElementById('country').value,feat=document.getElementById('t-feature').value.trim(),col=document.getElementById('t-color').value.trim();
   const parts=[];
   if(isQuistgaard(designer))parts.push(toDisplayCase(designer.nameEn));
   else{if(brand)parts.push(toDisplayCase(brand.nameEn));if(designer)parts.push(toDisplayCase(designer.nameEn));}
@@ -862,7 +862,7 @@ function updateMetafields() {
   const bi=document.getElementById('brand-select').value,di=document.getElementById('designer-select').value;
   const brand=bi!==''?state.brands[parseInt(bi)]:null,designer=di!==''?state.designers[parseInt(di)]:null;
   const tc=document.getElementById('t-tag-category')?document.getElementById('t-tag-category').value.trim():'';
-  const country=document.getElementById('country').value;
+  const country=document.getElementById('country-filter').value||document.getElementById('country').value;
   const countryEN={sweden:'Sweden',denmark:'Denmark',finland:'Finland',norway:'Norway',japan:'Japan',england:'England',czech:'Czech',germany:'Germany',others:'Others'};
   const catEl=document.getElementById('mf-category'),countryEl=document.getElementById('mf-country'),brandEl=document.getElementById('mf-brand');
   if(catEl)catEl.value=tc?toSentenceCase(CATEGORY_EN[tc]||tc):'';
@@ -883,7 +883,7 @@ function applySeries(val){const matched=state.series.find(s=>s.name.toLowerCase(
 
 // ================= HTML生成 =================
 function buildHtml() {
-  const country=document.getElementById('country').value,material=document.getElementById('material').value;
+  const country=document.getElementById('country-filter').value||document.getElementById('country').value,material=document.getElementById('material').value;
   const itemNo=document.getElementById('item-no').value.trim(),series=document.getElementById('series').value.trim();
   const year=document.getElementById('year').value.trim(),size=document.getElementById('size').value.trim();
   const condition=document.getElementById('condition').value.trim();
