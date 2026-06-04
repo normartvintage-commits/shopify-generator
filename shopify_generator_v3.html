@@ -168,7 +168,7 @@
         </div>
         <div>
           <label>デザイナー</label>
-          <select id="designer-select" onchange="updateAll()"><option value="">— 選択 —</option></select>
+          <select id="designer-select" onchange="onDesignerChange()"><option value="">— 選択 —</option></select>
         </div>
       </div>
       <input type="hidden" id="country" value="sweden">
@@ -543,6 +543,28 @@ function populateSelects() {
   if(prevD) ds.value=prevD;
   const sd=document.getElementById('s-designer');
   if(sd){ const prev=sd.value; sd.innerHTML='<option value="">— 選択 —</option>'; state.designers.forEach(d=>{const o=document.createElement('option');o.value=d.nameEn;o.textContent=d.nameEn;sd.appendChild(o);}); if(prev) sd.value=prev; }
+}
+
+function onDesignerChange() {
+  const di=document.getElementById('designer-select').value;
+  const bi=document.getElementById('brand-select').value;
+  // ブランド未選択の場合のみ、デザイナーの国をcountryに反映
+  if(bi===''&&di!==''){
+    const d=state.designers[parseInt(di)];
+    if(d&&d.country){
+      const countryLower=d.country.toLowerCase();
+      const cfEl=document.getElementById('country-filter');
+      const cEl=document.getElementById('country');
+      // country-filterの選択肢に存在するか確認
+      const opts=Array.from(cfEl.options).map(o=>o.value);
+      if(opts.includes(countryLower)){
+        cfEl.value=countryLower;
+        cEl.value=countryLower;
+        populateSelects();
+      }
+    }
+  }
+  updateAll();
 }
 
 function onBrandChange() { const bi=document.getElementById('brand-select').value; if(bi!==''){ const b=state.brands[parseInt(bi)]; if(b&&b.country){document.getElementById('country').value=b.country;document.getElementById('country-filter').value=b.country;} } updateAll(); }
