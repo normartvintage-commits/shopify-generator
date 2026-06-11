@@ -237,8 +237,8 @@
       <button class="btn btn-secondary" style="width:auto;margin-bottom:8px;" onclick="generateOpening()" id="opening-gen-btn">🔍 商品情報を取得</button>
       <div id="opening-status" style="font-size:11px;margin-bottom:6px;color:var(--text-muted);"></div>
       <textarea id="opening-text" rows="4" placeholder="取得した商品情報がここに表示されます" style="background:var(--bg);"></textarea>
-      <button class="btn btn-secondary" style="width:auto;margin-top:8px;" onclick="copyOpening()">冒頭文をコピー</button>
-      <div id="opening-copy-status" class="copy-status">✅ 冒頭文をコピーしました！</div>
+      <button class="btn btn-secondary" style="width:auto;margin-top:8px;" onclick="copyOpening()">情報をコピー</button>
+      <div id="opening-copy-status" class="copy-status">✅ 情報をコピーしました！</div>
     </div>
 
     <div class="card">
@@ -1008,6 +1008,12 @@ function generateOpening() {
   const btn=document.getElementById('opening-gen-btn'),statusEl=document.getElementById('opening-status');
   btn.disabled=true;btn.innerHTML='⌛ 生成中<span class="loading-dots"></span>';statusEl.textContent='';
 
+  const ser=document.getElementById('t-series').value.trim();
+  const feat=document.getElementById('t-feature').value.trim();
+  const col=document.getElementById('t-color').value.trim();
+  const tsz=document.getElementById('t-size').value.trim();
+  const mod=document.getElementById('t-model').value.trim();
+
   const callbackName='gasOpeningCb_'+Date.now();
   const script=document.createElement('script');
   const params=new URLSearchParams({
@@ -1018,6 +1024,11 @@ function generateOpening() {
     years:designer?designer.years:'',
     country:COUNTRY_JA[country]||'',
     category:cat||'',
+    series:ser||'',
+    feature:feat||'',
+    color:col||'',
+    size:tsz||'',
+    model:mod||'',
     callback:callbackName
   });
   script.src=GAS_URL+'?'+params.toString();
@@ -1033,7 +1044,7 @@ function generateOpening() {
       statusEl.textContent='❌ 生成に失敗しました';
       statusEl.style.color='#c0392b';
     }
-    btn.disabled=false;btn.innerHTML='✨ AIで冒頭文を生成';
+    btn.disabled=false;btn.innerHTML='🔍 商品情報を取得';
   };
 
   script.onerror=function(){
@@ -1041,7 +1052,7 @@ function generateOpening() {
     delete window[callbackName];
     statusEl.textContent='❌ 接続エラー';
     statusEl.style.color='#c0392b';
-    btn.disabled=false;btn.innerHTML='✨ AIで冒頭文を生成';
+    btn.disabled=false;btn.innerHTML='🔍 商品情報を取得';
   };
 
   setTimeout(function(){
@@ -1050,7 +1061,7 @@ function generateOpening() {
       try{document.body.removeChild(script);}catch(e){}
       statusEl.textContent='❌ タイムアウト';
       statusEl.style.color='#c0392b';
-      btn.disabled=false;btn.innerHTML='✨ AIで冒頭文を生成';
+      btn.disabled=false;btn.innerHTML='🔍 商品情報を取得';
     }
   },30000);
 
