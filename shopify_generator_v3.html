@@ -900,8 +900,8 @@ function updateMetafields() {
 
 // ================= シリーズ同期 =================
 function syncSeries(val){applySeries(val);}
-function syncSeriesFromTitle(val){if(document.getElementById('series'))document.getElementById('series').value=val;updateAll();}
-function applySeries(val){const matched=state.series.find(s=>s.name.toLowerCase()===val.toLowerCase());if(matched){if(matched.years)document.getElementById('year').value=matched.years;if(matched.desc){const fd=document.querySelector('[data-desc-id]');if(fd&&!fd.value.trim())fd.value=matched.desc;}}}
+function syncSeriesFromTitle(val){if(document.getElementById('series'))document.getElementById('series').value=val;applySeries(val);updateAll();}
+function applySeries(val){const matched=state.series.find(s=>s.name.toLowerCase()===val.toLowerCase());if(matched){if(matched.years)document.getElementById('year').value=matched.years;if(matched.desc){const dt=document.getElementById('desc-text');if(dt&&!dt.value.trim())dt.value=matched.desc;}}}
 
 // ================= HTML生成 =================
 function buildHtml() {
