@@ -232,11 +232,11 @@
     </div>
 
     <div class="card">
-      <p class="step-label"><span class="step-num" style="background:var(--accent);">✱</span> 商品説明文の冒頭をAI生成</p>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">ブランド・デザイナー・カテゴリから冒頭文を自動生成します。</p>
-      <button class="btn btn-secondary" style="width:auto;margin-bottom:8px;" onclick="generateOpening()" id="opening-gen-btn">✨ AIで冒頭文を生成</button>
+      <p class="step-label"><span class="step-num" style="background:var(--accent);">✱</span> 商品情報をAIで取得</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">ブランド・デザイナー・カテゴリをもとに、製造年代・シリーズ特徴・デザイン背景などの事実情報を取得します。</p>
+      <button class="btn btn-secondary" style="width:auto;margin-bottom:8px;" onclick="generateOpening()" id="opening-gen-btn">🔍 商品情報を取得</button>
       <div id="opening-status" style="font-size:11px;margin-bottom:6px;color:var(--text-muted);"></div>
-      <textarea id="opening-text" rows="4" placeholder="生成された冒頭文がここに表示されます" style="background:var(--bg);"></textarea>
+      <textarea id="opening-text" rows="4" placeholder="取得した商品情報がここに表示されます" style="background:var(--bg);"></textarea>
       <button class="btn btn-secondary" style="width:auto;margin-top:8px;" onclick="copyOpening()">冒頭文をコピー</button>
       <div id="opening-copy-status" class="copy-status">✅ 冒頭文をコピーしました！</div>
     </div>
