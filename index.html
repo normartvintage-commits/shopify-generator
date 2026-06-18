@@ -5,108 +5,113 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shopify 商品ページジェネレーター</title>
 <style>
-  :root {
-    --bg: #f5f3ef; --surface: #ffffff; --border: #e2ddd6; --border-strong: #c8c0b4;
-    --accent: #103948; --accent-light: #e8f0f3; --text: #1a1a18; --text-muted: #7a7570;
-    --success-bg: #eaf4ee; --success: #2d7a4f; --warning-bg: #fef9ec; --warning: #92600a;
-    --error-bg: #fbeae5; --error: #de3618;
-    --radius: 8px; --radius-lg: 12px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
-  header { background: var(--accent); color: white; padding: 14px 24px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; }
-  header h1 { font-size: 15px; font-weight: 500; letter-spacing: 0.04em; }
-  header span { font-size: 11px; opacity: 0.6; margin-left: auto; }
-  .container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
-  .data-actions { display: flex; gap: 8px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
-  .data-actions-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-right: 4px; }
-  .tabs { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 4px; margin-bottom: 20px; }
-  .tab { flex: 1; padding: 8px 4px; font-size: 12px; border: none; background: none; color: var(--text-muted); cursor: pointer; border-radius: 7px; transition: all 0.15s; font-weight: 500; }
-  .tab.active { background: var(--accent); color: white; }
-  .tab:not(.active):hover { background: var(--bg); color: var(--text); }
-  .sec { display: none; }
-  .sec.active { display: block; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 12px; }
-  .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
-  label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; margin-top: 12px; font-weight: 500; }
-  label:first-child, .section-title + label { margin-top: 0; }
-  input, select, textarea { width: 100%; padding: 9px 11px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: inherit; transition: border-color 0.15s; outline: none; }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; }
-  textarea { resize: vertical; line-height: 1.6; min-height: 72px; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-  .btn { padding: 8px 14px; font-size: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-family: inherit; font-weight: 500; transition: all 0.15s; }
-  .btn:hover { background: var(--bg); border-color: var(--border-strong); }
-  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); width: 100%; padding: 12px; justify-content: center; font-size: 14px; border-radius: var(--radius); margin-top: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-  .btn-primary:hover { background: #0b2934; border-color: #0b2934; }
-  .status { margin-top: 15px; padding: 12px 16px; border-radius: var(--radius); display: none; font-size: 13px; line-height: 1.5; }
-  .success { background: var(--success-bg); color: var(--success); border: 1px solid #d4ebd9; }
-  .error { background: var(--error-bg); color: var(--error); border: 1px solid #f7d6cd; }
-  .flex { display: flex; gap: 10px; width: 100%; }
-  hr { border: 0; border-top: 1px solid var(--border); margin: 24px 0; }
+  body { font-family: sans-serif; margin: 20px; background-fcolor: #f4f4f9; color: #333; }
+  .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  h1 { font-size: 24px; margin-bottom: 20px; color: #4a4a4a; text-align: center; }
+  .form-group { margin-bottom: 15px; }
+  label { display: block; font-weight: bold; margin-bottom: 5px; }
+  input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+  textarea { resize: vertical; }
+  .row { display: flex; gap: 15px; }
+  .row .form-group { flex: 1; }
+  button { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
+  button:hover { background-color: #0056b3; }
+  button:disabled { background-color: #ccc; cursor: not-allowed; }
+  .btn-secondary { background-color: #6c757d; width: auto; margin-top: 0; padding: 10px 15px; font-size: 14px; }
+  .btn-secondary:hover { background-color: #5a6268; }
+  .ai-box { background-color: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 5px solid #007bff; }
+  .ai-box h3 { margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #495057; }
+  .status { margin-top: 20px; padding: 15px; border-radius: 4px; display: none; font-weight: bold; }
+  .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .flex-container { display: flex; gap: 10px; align-items: flex-end; }
+  .flex-container input { flex: 1; }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Shopify 商品ページジェネレーター</h1>
-  <span>Normart Vintage Design Studio</span>
-</header>
-
 <div class="container">
-  <div class="data-actions">
-    <span class="data-actions-label">台帳連携</span>
-    <div class="flex" style="flex: 1; min-width: 240px;">
-      <input type="text" id="inputItemNo" placeholder="品番を入力 (例: 2547)" style="background: var(--surface);">
-      <button class="btn" id="btnFetch" style="white-space: nowrap;">スプレッドシートから取得</button>
+  <h1>Shopify 商品ページジェネレーター</h1>
+
+  <div class="form-group ai-box" style="border-left-color: #28a745;">
+    <h3>📊 在庫台帳データ連携</h3>
+    <div class="flex-container">
+      <input type="text" id="inputItemNo" placeholder="品番を入力してください (例: 2547)">
+      <button type="button" class="btn-secondary" id="btnFetch" style="background-color: #28a745;">台帳からデータ取得</button>
     </div>
-    <div id="fetchStatus" style="font-size: 12px; font-weight: bold; margin-left: 10px;"></div>
+    <div id="fetchStatus" style="margin-top: 5px; font-size: 13px; font-weight: bold;"></div>
   </div>
 
   <form id="productForm">
-    <div class="card">
-      <div class="section-title">基本情報</div>
-      
-      <label>商品タイトル (Title)</label>
-      <input type="text" id="title" required placeholder="例: Søholm Vintage Ceramic Bear Figurine by Joseph Simon">
-      
-      <div class="row2">
-        <div>
-          <label>カテゴリー (Product Type)</label>
-          <input type="text" id="category" placeholder="例: オブジェ・置物">
-        </div>
-        <div>
-          <label>ブランド / デザイナー (Vendor)</label>
-          <input type="text" id="brand" placeholder="例: Søholm / Joseph Simon">
-        </div>
-      </div>
-
-      <div class="row3">
-        <div>
-          <label>生産国 (Country)</label>
-          <input type="text" id="country" placeholder="例: デンマーク">
-        </div>
-        <div>
-          <label>売価（税込）</label>
-          <input type="text" id="price" placeholder="例: 21000">
-        </div>
-        <div>
-          <label>在庫数</label>
-          <input type="text" id="inventory" value="1">
-        </div>
+    
+    <div class="form-group">
+      <label for="title">商品タイトル (Title)</label>
+      <div class="flex-container">
+        <input type="text" id="title" required placeholder="商品タイトルを入力">
+        <button type="button" class="btn-secondary" id="btnTranslate">英語へ翻訳</button>
       </div>
     </div>
 
-    <div class="card">
-      <div class="section-title">商品説明文</div>
-      <label>商品説明 (Description HTML)</label>
-      <textarea id="body_html" rows="10" placeholder="HTML形式の商品説明文を入力、または自動生成してください。"></textarea>
-      
-      <label>タグ (カンマ区切り)</label>
-      <input type="text" id="tags" placeholder="例: vintage, Søholm, Joseph Simon, ceramic">
+    <div class="row">
+      <div class="form-group">
+        <label for="category">カテゴリー (Product Type)</label>
+        <input type="text" id="category" placeholder="例: オブジェ・置物">
+      </div>
+      <div class="form-group">
+        <label for="brand">ブランド / デザイナー (Vendor)</label>
+        <input type="text" id="brand" placeholder="例: Søholm / Joseph Simon">
+      </div>
     </div>
 
-    <button type="submit" class="btn btn-primary" id="btnSubmit">Shopifyにページを生成（下書き）</button>
+    <div class="row">
+      <div class="form-group">
+        <label for="country">生産国 (Country)</label>
+        <input type="text" id="country" placeholder="例: デンマーク">
+      </div>
+      <div class="form-group">
+        <label for="price">価格（売価・税込）</label>
+        <input type="text" id="price" placeholder="例: 21000">
+      </div>
+      <div class="form-group">
+        <label for="inventory">在庫数</label>
+        <input type="number" id="inventory" value="1" min="0">
+      </div>
+    </div>
+
+    <div class="ai-box">
+      <h3>✨ Gemini AI アシスタント</h3>
+      <p style="font-size: 13px; color: #666; margin-bottom: 10px;">デザイナーの歴史やブランド背景の解説文（オープニング文）を自動生成します。</p>
+      <div class="row">
+        <div class="form-group">
+          <label for="designerJa">デザイナー（日本語名）</label>
+          <input type="text" id="designerJa" placeholder="例: ジョセフ・シモン">
+        </div>
+        <div class="form-group">
+          <label for="years">製造年代 / シリーズ名</label>
+          <input type="text" id="years" placeholder="例: 1960年代 / Granit">
+        </div>
+      </div>
+      <button type="button" class="btn-secondary" id="btnGenerateOpening" style="width: 100%; margin-top: 5px;">🔍 ブランド・時代背景の解説文を生成</button>
+      <div id="aiOpeningStatus" style="margin-top: 5px; font-size: 12px;"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="body_html">商品説明文 (HTML)</label>
+      <textarea id="body_html" rows="12" placeholder="商品のコンディションや詳細な説明を入力してください。AI生成した文章もここに挿入されます。"></textarea>
+    </div>
+
+    <div class="form-group ai-box" style="border-left-color: #ffc107;">
+      <h3>📝 SEO対策（メタディスクリプション）</h3>
+      <button type="button" class="btn-secondary" id="btnGenerateMeta" style="background-color: #ffc107; color: #333; margin-bottom: 10px; width: 100%;">上記の説明文からメタディスクリプションを自動作成 (160文字以内)</button>
+      <textarea id="meta_description" rows="3" placeholder="生成されたメタディスクリプションがここに表示されます。"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="tags">タグ (カンマ区切り)</label>
+      <input type="text" id="tags" placeholder="例: vintage, Søholm, Joseph Simon">
+    </div>
+
+    <button type="submit" id="btnSubmit">Shopifyにページを生成（下書き保存）</button>
   </form>
 
   <div id="statusMessage" class="status"></div>
@@ -114,103 +119,92 @@
 
 <script>
   // ─────────────────────────────
-  // ⚠️ 以下のURLをご自身の最新の本物URLに書き換えてください！
+  // ⚠️ 以下のURLをご自身の「ウェブアプリのURL」に書き換えてください！
   // ─────────────────────────────
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwKFuH1YjQNDYbgUK7ot7xcJLv61HL7pZWqZcDlLfIRa__YGRpJrtYHjCphZ1gGtKe9/exec;
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwn1f9S2eX4_I0N9p7nNndK-7Y2w_Xb4vQY1nK7L7gJ7O4x_X8fX_fX_fX_exec";
 
-  // スプレッドシートからデータを取得する処理
+  // 1. スプレッドシートから台帳データを取得
   document.getElementById('btnFetch').addEventListener('click', function() {
     const itemNo = document.getElementById('inputItemNo').value.trim();
     const statusDiv = document.getElementById('fetchStatus');
     
     if (!itemNo) {
-      statusDiv.style.color = 'var(--error)';
-      statusDiv.innerText = '❌ 品番未入力';
+      statusDiv.style.color = 'red';
+      statusDiv.innerText = '❌ 品番を入力してください';
       return;
     }
+    statusDiv.style.color = '#666';
+    statusDiv.innerText = '⏳ 台帳を検索中...';
 
-    statusDiv.style.color = 'var(--text-muted)';
-    statusDiv.innerText = '⏳ 検索中...';
-
-    // 互換性を100%にするため、品番パラメータを直接渡す
-    fetch(`${GAS_URL}?itemNo=${encodeURIComponent(itemNo)}`)
+    fetch(`${GAS_URL}?action=lookup&itemNo=${encodeURIComponent(itemNo)}`)
       .then(response => response.json())
       .then(res => {
         if (res.success && res.data) {
-          statusDiv.style.color = 'var(--success)';
+          statusDiv.style.color = 'green';
           statusDiv.innerText = '✅ 取得成功';
           
-          // 取得した台帳データを各入力欄へマッピング
           document.getElementById('title').value = res.data['品名'] || '';
           document.getElementById('category').value = res.data['カテゴリー'] || '';
-          document.getElementById('brand').value = res.data['備考'] || ''; // ブランド/デザイナーに備考（Søholm等）をセット
+          document.getElementById('brand').value = res.data['備考'] || '';
           document.getElementById('price').value = res.data['売価（税込）'] || '';
           
-          // 在庫の「○」があれば1、それ以外は0
           const invValue = String(res.data['在庫']).trim();
           document.getElementById('inventory').value = (invValue === '○' || invValue === '1') ? '1' : '0';
         } else {
-          statusDiv.style.color = 'var(--error)';
-          statusDiv.innerText = `❌ ${res.error || '未登録の品番'}`;
+          statusDiv.style.color = 'red';
+          statusDiv.innerText = `❌ ${res.error || '未登録の品番です'}`;
         }
       })
       .catch(err => {
-        statusDiv.style.color = 'var(--error)';
-        statusDiv.innerText = '❌ 接続エラー';
-        console.error(err);
+        statusDiv.style.color = 'red';
+        statusDiv.innerText = '❌ GAS接続エラー';
       });
   });
 
-  // Shopifyへデータ登録（POST送信処理）
-  document.getElementById('productForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+  // 2. タイトルの英語翻訳
+  document.getElementById('btnTranslate').addEventListener('click', function() {
+    const titleVal = document.getElementById('title').value.trim();
+    if(!titleVal) return alert('翻訳するタイトルを入力してください。');
     
-    const submitBtn = document.getElementById('btnSubmit');
-    const msgDiv = document.getElementById('statusMessage');
-    
-    submitBtn.disabled = true;
-    msgDiv.style.display = 'none';
-
-    const itemNo = document.getElementById('inputItemNo').value.trim();
-
-    const payload = {
-      itemNos: itemNo ? [itemNo] : [],
-      title: document.getElementById('title').value,
-      body_html: document.getElementById('body_html').value,
-      brand: document.getElementById('brand').value,
-      category: document.getElementById('category').value,
-      country: document.getElementById('country').value,
-      price: document.getElementById('price').value,
-      inventory: document.getElementById('inventory').value,
-      tags: document.getElementById('tags').value
-    };
-
-    fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(res => {
-      submitBtn.disabled = false;
-      msgDiv.style.display = 'block';
-      
-      if (res.success && res.result && res.result.success) {
-        msgDiv.className = 'status success';
-        msgDiv.innerHTML = `🎉 Shopifyへの商品下書き登録に成功しました！<br><a href="${res.result.adminUrl}" target="_blank" style="color: var(--success); font-weight: bold; text-decoration: underline;">👉 Shopify管理画面で確認する</a>`;
-      } else {
-        msgDiv.className = 'status error';
-        msgDiv.innerText = '❌ Shopifyへの送信に失敗しました: ' + (res.error || JSON.stringify(res));
-      }
-    })
-    .catch(err => {
-      submitBtn.disabled = false;
-      msgDiv.style.display = 'block';
-      msgDiv.className = 'status error';
-      msgDiv.innerText = '❌ 送信エラーが発生しました。';
-      console.error(err);
-    });
+    this.innerText = '⏳ 翻訳中...';
+    fetch(`${GAS_URL}?action=translate&text=${encodeURIComponent(titleVal)}`)
+      .then(r => r.json())
+      .then(res => {
+        this.innerText = '英語へ翻訳';
+        if(res.success) {
+          document.getElementById('title').value = res.text;
+        } else {
+          alert('翻訳エラー: ' + res.error);
+        }
+      }).catch(() => { this.innerText = '英語へ翻訳'; });
   });
-</script>
 
-</body>
-</html>
+  // 3. Geminiによるブランド・時代背景解説（オープニング文）の自動生成
+  document.getElementById('btnGenerateOpening').addEventListener('click', function() {
+    const brand = document.getElementById('brand').value;
+    const designerJa = document.getElementById('designerJa').value;
+    const years = document.getElementById('years').value;
+    const category = document.getElementById('category').value;
+    const country = document.getElementById('country').value;
+    const status = document.getElementById('aiOpeningStatus');
+
+    status.style.color = '#666';
+    status.innerText = '⏳ Geminiが歴史と背景を生成中（約10〜15秒）...';
+
+    const params = new URLSearchParams({
+      action: 'opening',
+      brand: brand,
+      designerJa: designerJa,
+      years: years,
+      category: category,
+      country: country
+    });
+
+    fetch(`${GAS_URL}?${params.toString()}`)
+      .then(r => r.json())
+      .then(res => {
+        if(res.success && res.text) {
+          status.style.color = 'green';
+          status.innerText = '✅ 生成完了。商品説明文の先頭に追加しました。';
+          
+          const currentTxt
