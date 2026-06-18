@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shopify 商品ページジェネレーター</title>
 <style>
-  body { font-family: sans-serif; margin: 20px; background-fcolor: #f4f4f9; color: #333; }
+  body { font-family: sans-serif; margin: 20px; background-color: #f4f4f9; color: #333; }
   .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
   h1 { font-size: 24px; margin-bottom: 20px; color: #4a4a4a; text-align: center; }
   .form-group { margin-bottom: 15px; }
@@ -118,10 +118,8 @@
 </div>
 
 <script>
-  // ─────────────────────────────
-  // ⚠️ 以下のURLをご自身の「ウェブアプリのURL」に書き換えてください！
-  // ─────────────────────────────
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwKFuH1YjQNDYbgUK7ot7xcJLv61HL7pZWqZcDlLfIRa__YGRpJrtYHjCphZ1gGtKe9/exec;
+  // ご提示いただいた本物のウェブアプリURLをここに配置しました
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwKFuH1YjQNDYbgUK7ot7xcJLv61HL7pZWqZcDlLfIRa__YGRpJrtYHjCphZ1gGtKe9/exec";
 
   // 1. スプレッドシートから台帳データを取得
   document.getElementById('btnFetch').addEventListener('click', function() {
@@ -179,7 +177,7 @@
       }).catch(() => { this.innerText = '英語へ翻訳'; });
   });
 
-  // 3. Geminiによるブランド・時代背景解説（オープニング文）の自動生成
+  // 3. Geminiによるブランド・時代背景解説の自動生成
   document.getElementById('btnGenerateOpening').addEventListener('click', function() {
     const brand = document.getElementById('brand').value;
     const designerJa = document.getElementById('designerJa').value;
