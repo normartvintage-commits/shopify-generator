@@ -445,6 +445,44 @@
 <div id="toast" class="toast"></div>
 
 <script>
+
+
+function sendToShopify() {
+
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwEca_nmDTVKiwyr2jVbN9IrsT1I9qXJYKt3bCkHJiZt0R_HBDDo4TJsjLqEieUK5eB/exec";
+
+  const product = {
+    title: "テスト商品",
+    price: 14300,
+    handle: "test-product",
+    tags: ["test"],
+    vendor: "test",
+    product_type: "Object",
+    body_html: "<p>テスト</p>",
+    item_no: 9999,
+    inventory: 1
+  };
+
+  fetch(GAS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(product)
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("成功！商品ID: " + data.product_id);
+    console.log(data);
+  })
+  .catch(err => {
+    alert("失敗");
+    console.error(err);
+  });
+
+}
+
+  
 // ================= 定数 =================
 const CATEGORY_TAG = {'カップ＆ソーサー':'Cup/Mug','マグカップ':'Cup/Mug','プレート':'Plate/Bowl','ボウル':'Plate/Bowl','グラス':'Glass','フラワーベース':'Vase','キャンドルホルダー':'Candle','ライト':'Light','フィギュリン':'Figurine','アート':'Art','ブック':'Book','その他':'Others','オブジェ':'Object'};
 const CATEGORY_EN = {'カップ＆ソーサー':'Cup','マグカップ':'Mug','プレート':'Plate','ボウル':'Bowl','グラス':'Glass','フラワーベース':'Vase','キャンドルホルダー':'Candle','ライト':'Light','フィギュリン':'Figurine','アート':'Art','オブジェ':'Object','ブック':'Book','その他':'Others'};
