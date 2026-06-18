@@ -1081,21 +1081,28 @@ function writeShopifyIdToMaster(shopifyId) {
 
 // ================= Shopify登録（チャットに送信） =================
 function sendToChat() {
-  const title=buildTitle();
-  if(!title||title.indexOf('←')!==-1){showToast('⚠️ ブランドまたはカテゴリを入力してください');return;}
+  const title = buildTitle();
+  if (!title || title.indexOf('←') !== -1) {
+    showToast('⚠️ ブランドまたはカテゴリを入力してください');
+    return;
+  }
 
-  const priceRaw=document.getElementById('price').value.replace(/,/g,'');
-  const price=priceRaw?String(Math.round(parseFloat(priceRaw))):'0';
-  const inventoryEl=document.getElementById('inventory');
-  const inventory=inventoryEl&&inventoryEl.value.trim()?inventoryEl.value.trim():'';
-  const tags=buildTags();
-  const descHtml=buildHtml();
-  const seoTitle=document.getElementById('seo-title').value;
-  const metaDesc=document.getElementById('meta-desc').value;
-  const urlHandle=document.getElementById('url-handle').value;
-  const category=document.getElementById('mf-category').value;
-  const countryMF=document.getElementById('mf-country').value;
-  const brand=document.getElementById('mf-brand').value;
+  const priceRaw = document.getElementById('price').value.replace(/,/g, '');
+  const price = priceRaw ? String(Math.round(parseFloat(priceRaw))) : '0';
+
+  const inventoryEl = document.getElementById('inventory');
+  const inventory = inventoryEl && inventoryEl.value.trim() ? inventoryEl.value.trim() : '';
+
+  const tags = buildTags();
+  const descHtml = buildHtml();
+
+  const seoTitle = document.getElementById('seo-title').value;
+  const metaDesc = document.getElementById('meta-desc').value;
+  const urlHandle = document.getElementById('url-handle').value;
+
+  const category = document.getElementById('mf-category').value;
+  const countryMF = document.getElementById('mf-country').value;
+  const brand = document.getElementById('mf-brand').value;
 
   // 品番リスト取得（Item No欄からカンマ区切りで全品番を取得）
   const topVal = document.getElementById('item-no-top').value.trim();
@@ -1143,20 +1150,28 @@ ${(document.getElementById('theme-template').value) || 'デフォルトの商品
 
 【品番リスト】
 ${itemNos.join(', ')}
+
 ${isRestock
   ? '\n【再入荷】既存Shopify商品ID: ' + _restockShopifyId + '\n※ 新規ページは作成せず、在庫台帳の上記品番にこのShopify商品IDを記録してください。'
-  : '\n【新規登録】登録が完了したら商品管理URLとShopify商品IDを教えてください。在庫台帳への書き戻しに使用します。'}`;
+  : '\n【新規登録】登録が完了したら商品管理URLとShopify商品IDを教えてください。在庫台帳への書き戻しに使用します。'
+}`;
 
   if (typeof window.sendPrompt === 'function') {
     window.sendPrompt(message);
-    const statusEl=document.getElementById('claude-status');
-    statusEl.style.display='block';statusEl.style.background='var(--success-bg)';statusEl.style.color='var(--success)';
-    statusEl.innerHTML='✅ チャットに送信しました！Claudeが登録処理を開始します。';
+
+    const statusEl = document.getElementById('claude-status');
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'var(--success-bg)';
+    statusEl.style.color = 'var(--success)';
+    statusEl.innerHTML = '✅ チャットに送信しました！Claudeが登録処理を開始します。';
+
   } else {
-    navigator.clipboard.writeText(message).then(()=>{
-      const statusEl=document.getElementById('claude-status');
-      statusEl.style.display='block';statusEl.style.background='var(--warning-bg)';statusEl.style.color='var(--warning)';
-      statusEl.innerHTML='📋 データをクリップボードにコピーしました。チャットに貼り付けて送信してください。';
+    navigator.clipboard.writeText(message).then(() => {
+      const statusEl = document.getElementById('claude-status');
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'var(--warning-bg)';
+      statusEl.style.color = 'var(--warning)';
+      statusEl.innerHTML = '📋 データをクリップボードにコピーしました。チャットに貼り付けて送信してください。';
     });
   }
 }
