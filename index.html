@@ -343,7 +343,7 @@
 
     <!-- Shopify登録ボタン -->
     <div style="margin-top:8px;padding:16px;background:var(--surface);border:2px solid #2d7a4f;border-radius:var(--radius-lg);">
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">ボタンを押すと、このチャットにデータが自動送信されます。ClaudeがShopifyに下書き登録します。</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">ボタンを押すと、Shopifyに下書き（DRAFT）登録され、在庫台帳に商品IDが自動記録されます。</p>
       <button class="btn btn-shopify" onclick="sendToChat()" id="claude-register-btn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2L15 22 11 13 2 9l20-7z"></path></svg>
         Shopifyに登録する
@@ -969,15 +969,8 @@ function checkExistingProduct() {
   document.getElementById('restock-confirmed').style.display = 'none';
   _restockShopifyId = '';
 
-  fetch(GAS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'searchProduct', keywords: keywords })
-  })
-  .then(r => r.json())
-  .then(data => {
+  fetchExistingProductJSONP(keywords, function(data){
     if (!data.found || !data.candidates || data.candidates.length === 0) return;
-    // 候補を表示
     const area = document.getElementById('restock-check-area');
     const candidatesEl = document.getElementById('restock-candidates');
     candidatesEl.innerHTML = data.candidates.map(c =>
@@ -986,11 +979,28 @@ function checkExistingProduct() {
         <span style="color:#92600a;margin-left:8px;font-size:11px;">${c.shopifyId.replace('gid://shopify/Product/','ID: ')}</span>
       </div>`
     ).join('');
-    // 候補が1件なら自動選択
     area.dataset.candidates = JSON.stringify(data.candidates);
     area.style.display = 'block';
-  })
-  .catch(() => {}); // 接続エラーは無視（新規として続行）
+  });
+}
+
+// 既存商品検索（JSONP）
+function fetchExistingProductJSONP(keywords, callback) {
+  const callbackName='gasSearchCb_'+Date.now();
+  const script=document.createElement('script');
+  script.src=GAS_URL+'?action=searchProduct&callback='+callbackName
+    +'&keywords='+encodeURIComponent(keywords.join(','));
+  window[callbackName]=function(data){
+    delete window[callbackName];
+    try{document.body.removeChild(script);}catch(e){}
+    callback(data||{found:false,candidates:[]});
+  };
+  script.onerror=function(){
+    try{document.body.removeChild(script);}catch(e){}
+    delete window[callbackName];
+    callback({found:false,candidates:[]});
+  };
+  document.body.appendChild(script);
 }
 
 // 「はい（再入荷）」を選択
@@ -1016,7 +1026,7 @@ function denyRestock() {
   document.getElementById('restock-confirmed').style.display = 'none';
 }
 
-// ================= Shopify商品IDを在庫台帳へ書き戻す =================
+// ================= Shopify商品IDを在庫台帳へ書き戻す（JSONP） =================
 function writeShopifyIdToMaster(shopifyId) {
   const topVal = document.getElementById('item-no-top').value.trim();
   const itemNos = topVal
@@ -1025,20 +1035,25 @@ function writeShopifyIdToMaster(shopifyId) {
 
   if (!itemNos.length || !shopifyId) return;
 
-  fetch(GAS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'writeShopifyId', itemNos: itemNos, shopifyId: shopifyId })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (data.success) {
-      showToast(`✅ 在庫台帳に商品IDを記録しました（${data.updatedCount}件）`);
+  const callbackName='gasWriteIdCb_'+Date.now();
+  const script=document.createElement('script');
+  script.src=GAS_URL+'?action=writeShopifyId&callback='+callbackName
+    +'&itemNos='+encodeURIComponent(itemNos.join(','))
+    +'&shopifyId='+encodeURIComponent(shopifyId);
+
+  window[callbackName]=function(data){
+    delete window[callbackName];
+    try{document.body.removeChild(script);}catch(e){}
+    if(data && data.success){
+      showToast('✅ 在庫台帳に商品IDを記録しました（'+data.updatedCount+'件）');
     }
-  })
-  .catch(() => {
+  };
+  script.onerror=function(){
+    try{document.body.removeChild(script);}catch(e){}
+    delete window[callbackName];
     showToast('⚠️ 在庫台帳への書き戻しに失敗しました（手動で記録してください）');
-  });
+  };
+  document.body.appendChild(script);
 }
 
 // ================= Shopify登録（チャットに送信） =================
@@ -1109,18 +1124,81 @@ ${isRestock
   ? '\n【再入荷】既存Shopify商品ID: ' + _restockShopifyId + '\n※ 新規ページは作成せず、在庫台帳の上記品番にこのShopify商品IDを記録してください。'
   : '\n【新規登録】登録が完了したら商品管理URLとShopify商品IDを教えてください。在庫台帳への書き戻しに使用します。'}`;
 
-  if (typeof window.sendPrompt === 'function') {
-    window.sendPrompt(message);
-    const statusEl=document.getElementById('claude-status');
-    statusEl.style.display='block';statusEl.style.background='var(--success-bg)';statusEl.style.color='var(--success)';
-    statusEl.innerHTML='✅ チャットに送信しました！Claudeが登録処理を開始します。';
-  } else {
-    navigator.clipboard.writeText(message).then(()=>{
-      const statusEl=document.getElementById('claude-status');
-      statusEl.style.display='block';statusEl.style.background='var(--warning-bg)';statusEl.style.color='var(--warning)';
-      statusEl.innerHTML='📋 データをクリップボードにコピーしました。チャットに貼り付けて送信してください。';
-    });
+  // ===== GASへJSONP方式で直接登録（CORS回避） =====
+  const statusEl=document.getElementById('claude-status');
+  statusEl.style.display='block';
+  statusEl.style.background='var(--bg)';
+  statusEl.style.color='var(--text-muted)';
+  statusEl.innerHTML='⏳ Shopifyに登録中...';
+
+  const btn=document.getElementById('claude-register-btn');
+  if(btn) btn.disabled=true;
+
+  // 再入荷の場合は新規登録せず、在庫台帳に既存IDを書き戻すだけ
+  if (isRestock) {
+    writeShopifyIdToMaster(_restockShopifyId);
+    statusEl.style.background='var(--success-bg)';
+    statusEl.style.color='var(--success)';
+    statusEl.innerHTML='✅ 再入荷として在庫台帳に商品IDを記録しました。';
+    if(btn) btn.disabled=false;
+    return;
   }
+
+  const payload = {
+    商品タイトル: title,
+    価格: parseInt(price) || 0,
+    在庫数: inventory ? parseInt(inventory) : 1,
+    商品説明HTML: descHtml,
+    SEOタイトル: seoTitle,
+    メタディスクリプション: metaDesc,
+    URLハンドル: urlHandle,
+    タグ: tags,
+    itemNos: itemNos,
+    メタフィールド: { category: category, country: countryMF, brand: brand }
+  };
+
+  const callbackName='gasRegisterCb_'+Date.now();
+  const script=document.createElement('script');
+  script.src=GAS_URL+'?action=register&callback='+callbackName+'&payload='+encodeURIComponent(JSON.stringify(payload));
+
+  window[callbackName]=function(result){
+    delete window[callbackName];
+    try{document.body.removeChild(script);}catch(e){}
+    if(btn) btn.disabled=false;
+    if(result && result.success){
+      statusEl.style.background='var(--success-bg)';
+      statusEl.style.color='var(--success)';
+      statusEl.innerHTML='✅ '+result.message+'<br><a href="'+result.adminUrl+'" target="_blank" style="color:var(--success);text-decoration:underline;">Shopify管理画面で開く</a>';
+      showToast('✅ 登録完了！');
+    }else{
+      statusEl.style.background='var(--warning-bg)';
+      statusEl.style.color='var(--warning)';
+      statusEl.innerHTML='⚠️ エラー: '+((result&&result.error)||'不明なエラー');
+      showToast('⚠️ 登録に失敗しました');
+    }
+  };
+
+  script.onerror=function(){
+    try{document.body.removeChild(script);}catch(e){}
+    delete window[callbackName];
+    if(btn) btn.disabled=false;
+    statusEl.style.background='var(--warning-bg)';
+    statusEl.style.color='var(--warning)';
+    statusEl.innerHTML='⚠️ 接続エラー';
+  };
+
+  setTimeout(function(){
+    if(window[callbackName]){
+      delete window[callbackName];
+      try{document.body.removeChild(script);}catch(e){}
+      if(btn) btn.disabled=false;
+      statusEl.style.background='var(--warning-bg)';
+      statusEl.style.color='var(--warning)';
+      statusEl.innerHTML='⚠️ タイムアウト（処理に時間がかかっています。Shopify管理画面を確認してください）';
+    }
+  },60000);
+
+  document.body.appendChild(script);
 }
 
 // ================= AI生成 =================
