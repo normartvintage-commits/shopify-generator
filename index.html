@@ -207,4 +207,94 @@
           status.style.color = 'green';
           status.innerText = '✅ 生成完了。商品説明文の先頭に追加しました。';
           
-          const currentTxt
+          const currentTxt = document.getElementById('body_html').value;
+          document.getElementById('body_html').value = `【歴史・背景について】\n${res.text}\n\n` + currentTxt;
+        } else {
+          status.style.color = 'red';
+          status.innerText = '❌ 生成失敗: ' + (res.error || '原因不明');
+        }
+      }).catch(() => {
+        status.style.color = 'red';
+        status.innerText = '❌ 通信エラーが発生しました。';
+      });
+  });
+
+  // 4. メタディスクリプション自動生成
+  document.getElementById('btnGenerateMeta').addEventListener('click', function() {
+    const desc = document.getElementById('body_html').value.trim();
+    const category = document.getElementById('category').value;
+    const brand = document.getElementById('brand').value;
+    if(!desc) return alert('商品説明文を最初に入力（またはAI生成）してください。');
+
+    this.innerText = '⏳ 生成中...';
+    
+    const params = new URLSearchParams({
+      action: 'meta',
+      desc: desc,
+      category: category,
+      brand: brand
+    });
+
+    fetch(`${GAS_URL}?${params.toString()}`)
+      .then(r => r.json())
+      .then(res => {
+        this.innerText = '上記の説明文からメタディスクリプションを自動作成 (160文字以内)';
+        if(res.success) {
+          document.getElementById('meta_description').value = res.text;
+        } else {
+          alert('生成エラー: ' + res.error);
+        }
+      }).catch(() => { this.innerText = '上記の説明文からメタディスクリプションを自動作成 (160文字以内)'; });
+  });
+
+  // 5. Shopifyへ送信（POST送信）
+  document.getElementById('productForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('btnSubmit');
+    const msgDiv = document.getElementById('statusMessage');
+    
+    submitBtn.disabled = true;
+    msgDiv.style.display = 'none';
+
+    const itemNo = document.getElementById('inputItemNo').value.trim();
+    const payload = {
+      itemNos: itemNo ? [itemNo] : [],
+      title: document.getElementById('title').value,
+      body_html: document.getElementById('body_html').value,
+      meta_description: document.getElementById('meta_description').value,
+      brand: document.getElementById('brand').value,
+      category: document.getElementById('category').value,
+      country: document.getElementById('country').value,
+      price: document.getElementById('price').value,
+      inventory: document.getElementById('inventory').value,
+      tags: document.getElementById('tags').value
+    };
+
+    fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(res => {
+      submitBtn.disabled = false;
+      msgDiv.style.display = 'block';
+      
+      if (res.success && res.result && res.result.success) {
+        msgDiv.className = 'status success';
+        msgDiv.innerHTML = `🎉 Shopifyへの商品下書き登録に成功しました！<br><a href="${res.result.adminUrl}" target="_blank" style="font-weight: bold; text-decoration: underline;">👉 Shopify管理画面で確認する</a>`;
+      } else {
+        msgDiv.className = 'status error';
+        msgDiv.innerText = '❌ Shopifyへの送信に失敗しました: ' + (res.error || JSON.stringify(res));
+      }
+    })
+    .catch(err => {
+      submitBtn.disabled = false;
+      msgDiv.style.display = 'block';
+      msgDiv.className = 'status error';
+      msgDiv.innerText = '❌ 送信エラーが発生しました。';
+    });
+  });
+</script>
+
+</body>
+</html>
