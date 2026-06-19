@@ -709,6 +709,11 @@ function translateForUrl(text, callback) {
     delete window[callbackName];
     try { document.body.removeChild(script); } catch(e) {}
     const result = data.text || text;
+    // 翻訳結果がAIエラー文（quota超過・高負荷など）の場合はキャッシュせず、元の値を返す
+    if (isTranslationError(result)) {
+      callback(text);
+      return;
+    }
     translateCache[text] = result;
     callback(result);
   };
@@ -718,6 +723,20 @@ function translateForUrl(text, callback) {
     callback(text);
   };
   document.body.appendChild(script);
+}
+
+// 翻訳結果がAIエラーメッセージかどうか判定
+function isTranslationError(str) {
+  if (!str) return false;
+  const s = str.toLowerCase();
+  return s.indexOf('ai生成エラー') !== -1
+      || s.indexOf('quota') !== -1
+      || s.indexOf('high demand') !== -1
+      || s.indexOf('try again later') !== -1
+      || s.indexOf('exceeded') !== -1
+      || s.indexOf('rate limit') !== -1
+      || s.indexOf('experiencing') !== -1
+      || s.indexOf('error') !== -1;
 }
 
 // ================= Item No 検索 =================
