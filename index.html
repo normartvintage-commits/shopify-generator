@@ -1073,6 +1073,9 @@ function sendToChat() {
   const category = document.getElementById('mf-category').value;
   const countryMF = document.getElementById('mf-country').value;
   const brand = document.getElementById('mf-brand').value;
+  const seoTitle = document.getElementById('seo-title').value;
+  const metaDesc = document.getElementById('meta-desc').value;
+  const urlHandle = document.getElementById('url-handle').value;
 
   const topVal = document.getElementById('item-no-top').value.trim();
   const itemNos = topVal ? topVal.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -1108,7 +1111,10 @@ function sendToChat() {
     category: category,
     country: countryMF,
     tags: tags,
-    itemNos: itemNos
+    itemNos: itemNos,
+    seoTitle: seoTitle,
+    metaDesc: metaDesc,
+    handle: urlHandle
   };
 
   // ===== POST送信（hidden iframe + form）：長いHTMLもURL長制限なく送れる =====
