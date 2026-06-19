@@ -1056,7 +1056,7 @@ function writeShopifyIdToMaster(shopifyId) {
   document.body.appendChild(script);
 }
 
-// ================= Shopify登録（JSONP直接登録） =================
+// ================= Shopify登録（POST iframe方式・長いHTML対応） =================
 function sendToChat() {
   const title = buildTitle();
   if (!title || title.indexOf('←') !== -1) {
@@ -1111,54 +1111,41 @@ function sendToChat() {
     itemNos: itemNos
   };
 
-  const callbackName = 'gasRegisterCb_' + Date.now();
-  const script = document.createElement('script');
-  script.src = GAS_URL + '?action=register&callback=' + callbackName + '&payload=' + encodeURIComponent(JSON.stringify(payload));
+  // ===== POST送信（hidden iframe + form）：長いHTMLもURL長制限なく送れる =====
+  // GAS の doPost が商品作成 + 在庫台帳への商品ID書き戻しまで実行する。
+  // クロスオリジンのため iframe からレスポンスは読めないが、登録と書き戻しはGAS側で完結する。
+  const iframeName = 'gasPostFrame_' + Date.now();
+  const iframe = document.createElement('iframe');
+  iframe.name = iframeName;
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
 
-  window[callbackName] = function(result) {
-    delete window[callbackName];
-    try { document.body.removeChild(script); } catch (e) {}
-    if (btn) btn.disabled = false;
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = GAS_URL;
+  form.target = iframeName;
+  form.style.display = 'none';
 
-    if (result && result.success) {
-      statusEl.style.background = 'var(--success-bg)';
-      statusEl.style.color = 'var(--success)';
-      var adminUrl = result.adminUrl || '#';
-      statusEl.innerHTML = '✅ 登録完了！商品ID: ' + (result.productId || '') + '<br><a href="' + adminUrl + '" target="_blank" style="color:var(--success);text-decoration:underline;">Shopify管理画面で開く</a>';
-      showToast('✅ 登録完了！');
-      // 在庫台帳への書き戻し
-      if (result.productId) {
-        writeShopifyIdToMaster('gid://shopify/Product/' + result.productId);
-      }
-    } else {
-      statusEl.style.background = 'var(--warning-bg)';
-      statusEl.style.color = 'var(--warning)';
-      statusEl.innerHTML = '⚠️ エラー: ' + ((result && result.error) || '不明なエラー');
-      showToast('⚠️ 登録に失敗しました');
-    }
-  };
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'payload';
+  input.value = JSON.stringify(payload);
+  form.appendChild(input);
 
-  script.onerror = function() {
-    try { document.body.removeChild(script); } catch (e) {}
-    delete window[callbackName];
-    if (btn) btn.disabled = false;
-    statusEl.style.background = 'var(--warning-bg)';
-    statusEl.style.color = 'var(--warning)';
-    statusEl.innerHTML = '⚠️ 接続エラー';
-  };
+  document.body.appendChild(form);
+  form.submit();
 
+  // 送信完了の見込み表示（レスポンスは読めないため、送信後に管理画面確認を促す）
   setTimeout(function() {
-    if (window[callbackName]) {
-      delete window[callbackName];
-      try { document.body.removeChild(script); } catch (e) {}
-      if (btn) btn.disabled = false;
-      statusEl.style.background = 'var(--warning-bg)';
-      statusEl.style.color = 'var(--warning)';
-      statusEl.innerHTML = '⚠️ タイムアウト（処理に時間がかかっています。Shopify管理画面を確認してください）';
-    }
-  }, 60000);
-
-  document.body.appendChild(script);
+    statusEl.style.background = 'var(--success-bg)';
+    statusEl.style.color = 'var(--success)';
+    statusEl.innerHTML = '✅ 登録リクエストを送信しました。<br>数秒後にShopify管理画面の「商品（下書き）」と在庫台帳のShopify商品ID列をご確認ください。';
+    showToast('✅ 送信しました');
+    if (btn) btn.disabled = false;
+    // 後片付け
+    try { document.body.removeChild(form); } catch (e) {}
+    setTimeout(function() { try { document.body.removeChild(iframe); } catch (e) {} }, 5000);
+  }, 4000);
 }
 
 // ================= AI生成 =================
