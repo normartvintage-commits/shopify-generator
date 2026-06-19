@@ -889,9 +889,9 @@ function toSentenceCase(str) {
 }
 
 function toDisplayCase(str) {
-  // 各単語の先頭を大文字、他は小文字（Title Case）
+  // 各単語の先頭を大文字、他は小文字（Title Case）。&の直後も大文字化（例：B&G）
   if (!str) return '';
-  return str.toLowerCase().replace(/(?:^|\s|\/)(.)/g, function(match, char) {
+  return str.toLowerCase().replace(/(?:^|\s|\/|&)(.)/g, function(match, char) {
     return match.slice(0, -1) + char.toUpperCase();
   });
 }
