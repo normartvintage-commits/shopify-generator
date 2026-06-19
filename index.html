@@ -939,9 +939,42 @@ function syncSeriesFromTitle(val){if(document.getElementById('series'))document.
 function applySeries(val){const matched=state.series.find(s=>s.name.toLowerCase()===val.toLowerCase());if(matched){if(matched.years)document.getElementById('year').value=matched.years;if(matched.desc){const dt=document.getElementById('desc-text');if(dt&&!dt.value.trim())dt.value=matched.desc;}}}
 
 // ================= HTML生成 =================
+// 複数品番を範囲表記に変換（連続部分はまとめ、飛び番は区切る）
+// 例: 2310,2311,2350 → 2310-2311, 2350 ／ 2721,2722,2723 → 2721-2723
+// 非数値が混じる場合や数値化できない場合はカンマ区切りでそのまま列挙
+function formatItemNoRange(raw) {
+  if (!raw) return '';
+  const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0];
+
+  // すべて数値として扱えるか確認（プレフィックス付き等は単純列挙にフォールバック）
+  const allNumeric = parts.every(p => /^\d+$/.test(p));
+  if (!allNumeric) return parts.join(', ');
+
+  const nums = parts.map(Number);
+  const groups = [];
+  let start = nums[0], prev = nums[0];
+
+  for (let i = 1; i < nums.length; i++) {
+    if (nums[i] === prev + 1) {
+      // 連続している
+      prev = nums[i];
+    } else {
+      // 連続が途切れた → グループ確定
+      groups.push(start === prev ? String(start) : start + '-' + prev);
+      start = nums[i];
+      prev = nums[i];
+    }
+  }
+  groups.push(start === prev ? String(start) : start + '-' + prev);
+
+  return groups.join(', ');
+}
+
 function buildHtml() {
   const country=document.getElementById('country').value,material=document.getElementById('material').value;
-  const itemNo=document.getElementById('item-no').value.trim(),series=document.getElementById('series').value.trim();
+  const itemNo=formatItemNoRange(document.getElementById('item-no-top').value),series=document.getElementById('series').value.trim();
   const year=document.getElementById('year').value.trim(),size=document.getElementById('size').value.trim();
   const condition=document.getElementById('condition').value.trim();
   const bi=document.getElementById('brand-select').value,di=document.getElementById('designer-select').value;
