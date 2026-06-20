@@ -743,6 +743,9 @@ function isTranslationError(str) {
 
 function hasNonAsciiChar(s){for(var i=0;i<s.length;i++){if(s.charCodeAt(i)>127)return true;}return false;}
 function onCategoryInput(val) {
+  // 直接入力されたカテゴリをタグ用カテゴリにも反映（メタフィールドItem categoryの空欄防止）
+  const tagEl = document.getElementById('t-tag-category');
+  if (tagEl) tagEl.value = val.trim();
   updateAll();
   const el = document.getElementById('t-category-en');
   if (!val.trim()) { if(el) el.value = ''; return; }
@@ -922,7 +925,18 @@ function updateMetafields() {
   const country=document.getElementById('country').value;
   const countryEN={sweden:'Sweden',denmark:'Denmark',finland:'Finland',norway:'Norway',japan:'Japan',england:'England',czech:'Czech',germany:'Germany',others:'Others'};
   const catEl=document.getElementById('mf-category'),countryEl=document.getElementById('mf-country'),brandEl=document.getElementById('mf-brand');
-  if(catEl)catEl.value=tc?toSentenceCase(CATEGORY_EN[tc]||tc):'';
+  if(catEl){
+    // カテゴリのメタフィールド値：対応表にあればそれを優先、なければ翻訳結果(t-category-en)、それも無ければ元の値
+    const catEnEl=document.getElementById('t-category-en');
+    const catEnVal=catEnEl?catEnEl.value.trim():'';
+    let catMeta='';
+    if(tc){
+      if(CATEGORY_EN[tc]) catMeta=CATEGORY_EN[tc];        // プリセット対応表に一致
+      else if(catEnVal && !isTranslationError(catEnVal)) catMeta=catEnVal; // 直接入力→翻訳結果
+      else catMeta=tc;                                     // フォールバック（元の値）
+    }
+    catEl.value=catMeta?toSentenceCase(catMeta):'';
+  }
   if(countryEl)countryEl.value=toSentenceCase(countryEN[country]||'');
   if(brandEl){
     const rawBrand=isQuistgaard(designer)?(designer?designer.nameEn:''):(brand?brand.nameEn:'');
