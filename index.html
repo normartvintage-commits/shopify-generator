@@ -446,8 +446,8 @@
 
 <script>
 // ================= 定数 =================
-const CATEGORY_TAG = {'カップ＆ソーサー':'Cup/Mug','マグカップ':'Cup/Mug','プレート':'Plate/Bowl','ボウル':'Plate/Bowl','グラス':'Glass','フラワーベース':'Vase','キャンドルホルダー':'Candle','ライト':'Light','フィギュリン':'Figurine','アート':'Art','ブック':'Book','その他':'Others','オブジェ':'Object'};
-const CATEGORY_EN = {'カップ＆ソーサー':'Cup','マグカップ':'Mug','プレート':'Plate','ボウル':'Bowl','グラス':'Glass','フラワーベース':'Vase','キャンドルホルダー':'Candle','ライト':'Light','フィギュリン':'Figurine','アート':'Art','オブジェ':'Object','ブック':'Book','その他':'Others'};
+const CATEGORY_TAG = {'カップ＆ソーサー':'Cup/Mug','マグカップ':'Cup/Mug','プレート':'Plate/Bowl','ボウル':'Plate/Bowl','グラス':'Glass','フラワーベース':'Vase','キャンドルホルダー':'Candle','ライト':'Light','フィギュリン':'Figurine','アート':'Art','ブック':'Book','その他':'Other','オブジェ':'Object'};
+const CATEGORY_EN = {'カップ＆ソーサー':'Cup','マグカップ':'Mug','プレート':'Plate','ボウル':'Bowl','グラス':'Glass','フラワーベース':'Vase','キャンドルホルダー':'Candle','ライト':'Light','フィギュリン':'Figurine','アート':'Art','オブジェ':'Object','ブック':'Book','その他':'Other'};
 const COUNTRY_TAG = {sweden:'sweden',denmark:'denmark',finland:'finland',norway:'norway',japan:'japan',england:'england',czech:'czech',germany:'germany',others:'others'};
 const BANNERS = {sweden:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/Made_in_sweden.png?v=1705735320',denmark:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/MADE_IN_DENMARK.png?v=1705715868',finland:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/MADE_IN_DENMARK_94b21470-502c-44a1-96a4-ee4a3efc884a.png?v=1707210471',norway:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/Made_in_sweden.png?v=1705735320',japan:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/Made_in_sweden.png?v=1705735320',england:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/Made_in_sweden.png?v=1705735320',czech:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/Made_in_sweden.png?v=1705735320',germany:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/Made_in_sweden.png?v=1705735320',others:'https://cdn.shopify.com/s/files/1/0685/7959/0453/files/Made_in_sweden.png?v=1705735320'};
 const COUNTRY_JA = {sweden:'スウェーデン',denmark:'デンマーク',finland:'フィンランド',norway:'ノルウェー',japan:'日本',england:'イングランド',czech:'チェコ',germany:'ドイツ',others:'その他'};
@@ -536,10 +536,20 @@ function switchTab(name) { document.querySelectorAll('.tab').forEach(t=>t.classL
 function toggleSub(id) { const el=document.getElementById(id); el.style.display=el.style.display==='block'?'none':'block'; if(el.style.display==='none'){ if(id==='brand-subform'){editingBrandIdx=-1;document.getElementById('brand-save-btn').textContent='保存';} if(id==='designer-subform'){editingDesignerIdx=-1;document.getElementById('designer-save-btn').textContent='保存';} if(id==='series-subform'){editingSeriesIdx=-1;document.getElementById('series-save-btn').textContent='保存';} } }
 function toggleAccordion(id,header) { const body=document.getElementById(id); const isOpen=body.classList.contains('open'); if(isOpen){body.classList.remove('open');header.classList.remove('open');}else{body.classList.add('open');header.classList.add('open');} }
 
+// ================= カテゴリ処理（修正版）=================
 function applyCategory() {
-  const preset=document.getElementById('t-category-preset').value; if(!preset) return;
-  if(preset==='その他'){document.getElementById('t-category').value='';document.getElementById('t-category').focus();document.getElementById('t-tag-category').value='その他';}
-  else{const label=preset.split('（')[0];document.getElementById('t-category').value=label;document.getElementById('t-tag-category').value=label;}
+  const preset = document.getElementById('t-category-preset').value;
+  if (!preset) return;
+
+  if (preset === 'その他') {
+    document.getElementById('t-category').value = '';
+    document.getElementById('t-tag-category').value = 'その他';  // 修正：明示的にセット
+    document.getElementById('t-category').focus();
+  } else {
+    const label = preset.split('（')[0];
+    document.getElementById('t-category').value = label;
+    document.getElementById('t-tag-category').value = label;  // 修正：プリセット時のみセット
+  }
   updateAll();
 }
 
@@ -742,15 +752,20 @@ function isTranslationError(str) {
 // ================= Item No 検索 =================
 
 function hasNonAsciiChar(s){for(var i=0;i<s.length;i++){if(s.charCodeAt(i)>127)return true;}return false;}
+
+// ================= カテゴリ直接入力（修正版）=================
 function onCategoryInput(val) {
-  // 直接入力されたカテゴリをタグ用カテゴリにも反映（メタフィールドItem categoryの空欄防止）
-  const tagEl = document.getElementById('t-tag-category');
-  if (tagEl) tagEl.value = val.trim();
-  updateAll();
+  // 修正：タグ用カテゴリは「プリセット選択時のみ」セット
+  // 直接入力では上書きしない（URLと説明文のみ更新）
   const el = document.getElementById('t-category-en');
-  if (!val.trim()) { if(el) el.value = ''; return; }
+  if (!val.trim()) { 
+    if(el) el.value = ''; 
+    return; 
+  }
   var hasNonAscii = false;
-  for(var ci=0;ci<val.length;ci++){if(val.charCodeAt(ci)>127){hasNonAscii=true;break;}}
+  for(var ci=0;ci<val.length;ci++){
+    if(val.charCodeAt(ci)>127){hasNonAscii=true;break;}
+  }
   if (hasNonAscii) {
     translateForUrl(val, function(en) {
       if (el) { el.value = en; updateAll(); }
@@ -758,6 +773,7 @@ function onCategoryInput(val) {
   } else {
     if (el) el.value = val;
   }
+  updateAll();  // URLと説明文は更新
 }
 
 function onTextInputWithTranslate(val) {
