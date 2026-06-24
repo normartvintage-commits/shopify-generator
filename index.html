@@ -1196,7 +1196,8 @@ function sendToChat() {
     itemNos: itemNos,
     seoTitle: seoTitle,
     metaDesc: metaDesc,
-    handle: urlHandle
+    handle: urlHandle,
+    templateSuffix: document.getElementById('theme-template').value  // ★追加：テーマテンプレート
   };
 
   // text/plain でPOST → preflight(OPTIONS)が発生せずCORS回避。レスポンスも読める。
