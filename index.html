@@ -390,7 +390,7 @@
     <div class="card">
       <p class="section-title">登録済みデザイナー</p>
       <div id="designers-list"></div>
-      <button class="btn add-btn" onclick="toggleSub('designer-subform')">＋ デザイナーを追加</button>
+      <button class="btn add-btn" onclick="toggleSub('designer-subform'); renderBrandCheckboxes()">＋ デザイナーを追加</button>
       <div id="designer-subform" class="sub-form">
         <div class="row2">
           <div><label>デザイナー名（英語）</label><input type="text" id="d-name-en" placeholder="Erik Höglund"></div>
@@ -562,8 +562,14 @@ function populateSelects() {
   bs.innerHTML='<option value="">— 選択 —</option>';
   state.brands.forEach((b,i)=>{ if(!cf||b.country===cf){const o=document.createElement('option');o.value=i;o.textContent=b.nameEn;bs.appendChild(o);} });
   if(prevB) bs.value=prevB;
+  const selectedBrandIdx = bs.value !== '' ? parseInt(bs.value) : -1;
   ds.innerHTML='<option value="">— 選択 —</option>';
-  state.designers.forEach((d,i)=>{ const dc=(d.country||'').toUpperCase(),fu=(cf||'').toUpperCase(); if(!cf||d.multinational||dc===fu){const o=document.createElement('option');o.value=i;o.textContent=d.nameEn+(d.multinational?' ★':'');ds.appendChild(o);} });
+  state.designers.forEach((d,i)=>{
+    const dc=(d.country||'').toUpperCase(),fu=(cf||'').toUpperCase();
+    const countryOk = !cf || d.multinational || dc===fu;
+    const brandOk = selectedBrandIdx === -1 || d.multinational || (Array.isArray(d.linkedBrands) && d.linkedBrands.includes(selectedBrandIdx));
+    if(countryOk && brandOk){const o=document.createElement('option');o.value=i;o.textContent=d.nameEn+(d.multinational?' ★':'');ds.appendChild(o);}
+  });
   if(prevD) ds.value=prevD;
   const sd=document.getElementById('s-designer');
   if(sd){ const prev=sd.value; sd.innerHTML='<option value="">— 選択 —</option>'; state.designers.forEach(d=>{const o=document.createElement('option');o.value=d.nameEn;o.textContent=d.nameEn;sd.appendChild(o);}); if(prev) sd.value=prev; }
@@ -591,7 +597,7 @@ function onDesignerChange() {
   updateAll();
 }
 
-function onBrandChange() { const bi=document.getElementById('brand-select').value; if(bi!==''){ const b=state.brands[parseInt(bi)]; if(b&&b.country){document.getElementById('country').value=b.country;document.getElementById('country-filter').value=b.country;} } updateAll(); }
+function onBrandChange() { const bi=document.getElementById('brand-select').value; if(bi!==''){ const b=state.brands[parseInt(bi)]; if(b&&b.country){document.getElementById('country').value=b.country;document.getElementById('country-filter').value=b.country;} } populateSelects(); const ds=document.getElementById('designer-select'); if(ds.value!==''&&!ds.querySelector('option[value="'+ds.value+'"]')) ds.value=''; updateAll(); }
 function isQuistgaard(d) { return d&&d.nameEn&&d.nameEn.toUpperCase().indexOf('QUISTGAARD')!==-1; }
 
 // ================= タイトル・URL =================
